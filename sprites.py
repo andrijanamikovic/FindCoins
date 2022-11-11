@@ -111,8 +111,6 @@ class ExampleAgent(Agent):
 
     def get_agent_path(self, coin_distance):
         path = [i for i in range(1, len(coin_distance))]
-        print("Ovako mi izgleda coin_distance: ");
-        print(coin_distance);
         random.shuffle(path)
         return [0] + path + [0]
 
@@ -122,6 +120,21 @@ class Aki(Agent):
         super().__init__(x, y, file_name)
 
     def get_agent_path(self, coin_distance):
-        path = [i for i in range(1, len(coin_distance))]
-        random.shuffle(path)
-        return [0] + path + [0]
+        nodes = []
+        visited = set()
+        nodes.append(0)
+        path = []
+        while len(nodes) > 0:
+            neighbors = []
+            cost = []
+            current = nodes.pop(0)
+            if current in visited:
+                continue
+            cost = coin_distance[current]
+            print(cost)
+            neighbors = (sorted(range(len(cost)), key=lambda k: cost[k]))
+            nodes = neighbors + nodes
+            path.append(current)
+            visited.add(current)
+        return path + [0]
+
