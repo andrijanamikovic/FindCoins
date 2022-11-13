@@ -5,6 +5,7 @@ import pygame
 import os
 import config
 from itertools import permutations
+from queue import PriorityQueue
 
 
 class BaseSprite(pygame.sprite.Sprite):
@@ -153,7 +154,7 @@ class Jocke(Agent):
             cost = coin_distance[0][p[0]]
             for i in range(len(p) - 1):
                 cost = cost + coin_distance[p[i]][p[i + 1]]
-            cost = cost + coin_distance[p[i+1]][0]
+            cost = cost + coin_distance[p[i + 1]][0]
             if cost < minimum:
                 minimum = cost
                 path = []
@@ -161,3 +162,60 @@ class Jocke(Agent):
                     path.append(i)
         return [0] + path + [0]
 
+
+class Uki(Agent):
+    def __init__(self, x, y, file_name):
+        super().__init__(x, y, file_name)
+
+    def get_agent_path(self, coin_distance):
+        nodes = PriorityQueue()
+        nodes.put((0, [0], 0))
+        n = len(coin_distance[0])
+        while nodes.qsize() > 0:
+            current = nodes.get()
+            # fali mi deo kad imam iste putanje, tj sa istim min vrednostima
+            temp = nodes.get()
+            i = 0
+            # while temp[0] == current[0]:
+            #     print("Gde pucas 2")
+            #     if len(temp[1]) > len(current[1]):
+            #         temp = nodes.get()
+            #         nodes.put(current)
+            #         current = temp
+            #         i = i + 1
+            #         temp = nodes.
+            #         print("Gde pucas 3")
+            #     if len(temp[1]) == len(current[1]) and temp[2] < current[2]:
+            #         temp = nodes.get()
+            #         nodes.put(current)
+            #         current = temp
+            #         i = i + 1
+            #         temp = nodes.queue[i]
+            #         print("Gde pucas 4")
+            # nodes.put(temp)
+            if len(current[1]) == n:
+                path = current[1]
+                break
+        # formiranje novih parcijalnih putanja tako sto na current dodajem sledbenike
+            for i in range(0, len(coin_distance)):
+                if i == current[2]:
+                    continue
+                cost = current[0] + coin_distance[current[2]][i]
+
+                if i not in current[1]:
+                    if len(current[1]) + 1 == n:
+                        cost = cost + coin_distance[i][0]
+                    nodes.put((cost, current[1]+[i], i))
+                    # print("Sta i koliko puta ubacujem u ovom foru?? ", cost, current[1]+[i], i)
+            # print("U redu mi je: ", nodes.queue)
+        return path + [0]
+
+class Micko(Agent):
+    def __init__(self, x, y, file_name):
+        super().__init__(x, y, file_name)
+
+    def get_agent_path(self, coin_distance):
+        path = []
+        #A*
+
+        return [0] + path + [0]
