@@ -149,7 +149,7 @@ class Jocke(Agent):
         path = []
         minimum = float('inf')
         permu = list(permutations(range(1, len(coin_distance[0]))))
-        print(permu)
+        # print(permu)
         for p in permu:
             cost = coin_distance[0][p[0]]
             for i in range(len(p) - 1):
@@ -169,53 +169,60 @@ class Uki(Agent):
 
     def get_agent_path(self, coin_distance):
         nodes = PriorityQueue()
-        nodes.put((0, [0], 0))
+        nodes.put((0, len(coin_distance[0]) - len([0]), 0, [0]))
         n = len(coin_distance[0])
         while nodes.qsize() > 0:
             current = nodes.get()
-            # fali mi deo kad imam iste putanje, tj sa istim min vrednostima
-            temp = nodes.get()
-            i = 0
-            # while temp[0] == current[0]:
-            #     print("Gde pucas 2")
-            #     if len(temp[1]) > len(current[1]):
-            #         temp = nodes.get()
-            #         nodes.put(current)
-            #         current = temp
-            #         i = i + 1
-            #         temp = nodes.
-            #         print("Gde pucas 3")
-            #     if len(temp[1]) == len(current[1]) and temp[2] < current[2]:
-            #         temp = nodes.get()
-            #         nodes.put(current)
-            #         current = temp
-            #         i = i + 1
-            #         temp = nodes.queue[i]
-            #         print("Gde pucas 4")
-            # nodes.put(temp)
-            if len(current[1]) == n:
-                path = current[1]
+            if len(current[3]) == n:
+                path = current[3]
                 break
-        # formiranje novih parcijalnih putanja tako sto na current dodajem sledbenike
-            for i in range(0, len(coin_distance)):
+            for i in range(0, len(coin_distance[0])):
                 if i == current[2]:
                     continue
                 cost = current[0] + coin_distance[current[2]][i]
-
-                if i not in current[1]:
-                    if len(current[1]) + 1 == n:
+                if i not in current[3]:
+                    if len(current[3]) + 1 == n:
                         cost = cost + coin_distance[i][0]
-                    nodes.put((cost, current[1]+[i], i))
-                    # print("Sta i koliko puta ubacujem u ovom foru?? ", cost, current[1]+[i], i)
+                    nodes.put((cost, len(coin_distance[0]) - len(current[3] + [i]), i, current[3] + [i]))
+                    # print("Sta i koliko puta ubacujem u ovom foru?? ", cost, current[1]+1, i, current[3]+[i])
             # print("U redu mi je: ", nodes.queue)
         return path + [0]
+
 
 class Micko(Agent):
     def __init__(self, x, y, file_name):
         super().__init__(x, y, file_name)
 
-    def get_agent_path(self, coin_distance):
-        path = []
-        #A*
+    def calculate_heuristic(self, node, coin_distance):
+        #MST 
+        cost = 0
+        visited = [node]
+        last = node
+        while len(visited) < len(coin_distance[0]):
+            minimum = min([i for i in coin_distance[last] if i != 0 and i not in visited])
+            cost = cost+minimum
+            visited = visited + [coin_distance[last].index(minimum)]
+        return cost
 
-        return [0] + path + [0]
+    def get_agent_path(self, coin_distance):
+        nodes = PriorityQueue()
+        nodes.put((0, len(coin_distance[0]) - len([0]), 0, [0]))
+        n = len(coin_distance[0])
+        while nodes.qsize() > 0:
+            current = nodes.get()
+            if len(current[3]) == n:
+                path = current[3]
+                break
+            for i in range(0, len(coin_distance[0])):
+                if i == current[2]:
+                    continue
+                cost = current[0] + coin_distance[current[2]][i]
+                cost = cost + self.calculate_heuristic(i, coin_distance)
+                if i not in current[3]:
+                    if len(current[3]) + 1 == n:
+                        cost = cost + coin_distance[i][0]
+                        # ovo treba da proverim dal mi treba
+                    nodes.put((cost, len(coin_distance[0]) - len(current[3] + [i]), i, current[3] + [i]))
+                    # print("Sta i koliko puta ubacujem u ovom foru?? ", cost, current[1]+1, i, current[3]+[i])
+            # print("U redu mi je: ", nodes.queue)
+        return path + [0]
