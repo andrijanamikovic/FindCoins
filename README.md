@@ -1,2 +1,2 @@
 # FindCoins
- Travelling salesman problem, finding coins intelligent system
+ Traveling salesman problem, finding coins intelligent system
